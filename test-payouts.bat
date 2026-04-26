@@ -41,11 +41,16 @@ echo.
 REM ============================================================================
 REM TEST 3: Concurrency - Prevent overdraft
 echo [TEST 3] Testing concurrency - Two INR 60 payouts against INR 100 balance...
-echo          Firing Request A (saving to test3a.json)...
-start /min cmd /c "curl -s -X POST %BASE_URL%/api/v1/payouts/ -H Authorization: Api-Key api-key-tiny-studio -H Content-Type: application/json -H Idempotency-Key: 33333333-3333-3333-3333-333333333333 -d {\"amount_paise\": 6000, \"bank_account_id\": \"concurrency-a\"} > test3a.json"
+echo          Preparing concurrent requests...
 
-echo          Firing Request B (saving to test3b.json)...
-start /min cmd /c "curl -s -X POST %BASE_URL%/api/v1/payouts/ -H Authorization: Api-Key api-key-tiny-studio -H Content-Type: application/json -H Idempotency-Key: 44444444-4444-4444-4444-444444444444 -d {\"amount_paise\": 6000, \"bank_account_id\": \"concurrency-b\"} > test3b.json"
+REM Write curl commands to temp batch files so quotes are preserved
+echo curl -s -X POST %BASE_URL%/api/v1/payouts/ -H "Authorization: Api-Key api-key-tiny-studio" -H "Content-Type: application/json" -H "Idempotency-Key: 33333333-3333-3333-3333-333333333333" -d "{\"amount_paise\": 6000, \"bank_account_id\": \"concurrency-a\"}" ^> test3a.json > _req_a.bat
+echo curl -s -X POST %BASE_URL%/api/v1/payouts/ -H "Authorization: Api-Key api-key-tiny-studio" -H "Content-Type: application/json" -H "Idempotency-Key: 44444444-4444-4444-4444-444444444444" -d "{\"amount_paise\": 6000, \"bank_account_id\": \"concurrency-b\"}" ^> test3b.json > _req_b.bat
+
+echo          Firing Request A...
+start /b _req_a.bat
+echo          Firing Request B...
+start /b _req_b.bat
 
 echo          Waiting 5 seconds...
 ping -n 6 127.0.0.1 >nul
@@ -74,7 +79,7 @@ echo.
 
 REM ============================================================================
 REM CLEANUP
-del test1.json test2a.json test2b.json test3a.json test3b.json test4_me.json test4_ledger.json 2>nul
+del test1.json test2a.json test2b.json test3a.json test3b.json test4_me.json test4_ledger.json _req_a.bat _req_b.bat 2>nul
 
 echo ==========================================================
 echo   TESTS COMPLETE
