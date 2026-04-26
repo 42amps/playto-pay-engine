@@ -33,4 +33,4 @@ RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
-CMD ["gunicorn", "playto.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD sh -c "python manage.py migrate --noinput && python manage.py seed && gunicorn playto.wsgi:application --bind 0.0.0.0:8000"
