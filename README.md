@@ -2,6 +2,8 @@
 
 A minimal payout engine for cross-border payments. Merchants can view balances, request payouts, and track status with strong money integrity guarantees.
 
+**Live Demo:** [https://playto-pay-engine.onrender.com](https://playto-pay-engine.onrender.com)
+
 ## Stack
 
 - **Backend:** Django + Django REST Framework
@@ -58,7 +60,11 @@ Use the Tiny Studio account (₹100) to test concurrency by firing two simultane
 ## Running Tests
 
 ```bash
+# Local (with Docker)
 docker-compose exec web python manage.py test payouts
+
+# Or with local Python + SQLite
+python manage.py test payouts --settings=playto.test_settings
 ```
 
 ## Deployment
@@ -66,14 +72,16 @@ docker-compose exec web python manage.py test payouts
 Build the production image (bundles React into Django static files):
 
 ```bash
-docker build -t playto-payout-engine ./backend
-# The multi-stage Dockerfile builds the frontend and copies dist/ into Django
+docker build -t playto-payout-engine .
+# The root Dockerfile is multi-stage: builds React, then bundles into Django
 ```
 
 Environment variables for production:
 - `SECRET_KEY` — Django secret key
 - `DATABASE_URL` — PostgreSQL connection string
 - `DEBUG=0`
+
+**Resetting demo data:** Set `RESET_DATA=1` as an environment variable before deploy. The container will wipe all payouts/ledger/idempotency keys and restore the 3 merchants to their initial balances. Remove the variable after deploy to prevent accidental resets.
 
 ## Architecture Decisions
 

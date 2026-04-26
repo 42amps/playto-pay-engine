@@ -51,7 +51,7 @@ with transaction.atomic():
 
 **What database primitive does it rely on?**
 
-`SELECT FOR UPDATE` on the `Merchant` row. This acquires a row-level lock in PostgreSQL. If two requests for the same merchant arrive simultaneously, the second blocks until the first commits and releases the lock. Only then does the second request read the updated balance (which already includes the first payout's debit) and reject the overdraft.
+`SELECT FOR UPDATE` on the `Merchant` row. This acquires a row-level lock in PostgreSQL and holds it for the duration of the transaction. The critical section — balance check, payout creation, and ledger insert — all happen inside this single transaction. If two requests for the same merchant arrive simultaneously, the second blocks until the first commits and releases the lock. Only then does the second request read the updated balance (which already includes the first payout's debit) and reject the overdraft.
 
 **Why not optimistic locking?** Because pessimistic locking is simpler and correct for this workload. We expect payout creation to be fast; holding the lock for a single INSERT is acceptable.
 
@@ -76,7 +76,7 @@ except IdempotencyKey.DoesNotExist:
 
 **What if the first request is in flight when the second arrives?**
 
-The second request blocks on the same `SELECT FOR UPDATE` lock on the merchant row. It cannot proceed to check the `IdempotencyKey` table until the first request commits. Once the first request commits, it has already inserted the `IdempotencyKey` row. The second request then reads that row and returns the stored response. No duplicate payout is ever created.
+The second request blocks on the same `SELECT FOR UPDATE` lock on the merchant row. This ordering is crucial: the idempotency check happens **after** acquiring the lock, not before. The second request cannot proceed to check the `IdempotencyKey` table until the first request commits. Once the first request commits, it has already inserted the `IdempotencyKey` row. The second request then reads that row and returns the stored response. No duplicate payout is ever created.
 
 Keys expire after 24 hours via a cleanup query that runs under the same lock:
 
@@ -108,7 +108,7 @@ def transition_to(self, new_status):
     self.save(update_fields=["status", "updated_at"])
 ```
 
-Because `FAILED` maps to an empty list `[]`, any attempt to call `transition_to(Payout.COMPLETED)` on a failed payout raises `ValueError`. The background worker catches this and aborts.
+Because `FAILED` maps to an empty list `[]`, any attempt to call `transition_to(Payout.COMPLETED)` on a failed payout raises `ValueError`. `transition_to` is the only code path in the entire codebase that modifies `payout.status`, so there is no way to bypass this check.
 
 **Fund return atomicity:** When a payout fails, `_fail_payout_and_refund` runs inside the same `transaction.atomic()` block as the state transition. The state change and the reversing credit are committed together or not at all.
 
