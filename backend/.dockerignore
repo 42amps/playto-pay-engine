@@ -1,0 +1,12 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.sqlite3
+.env
+.venv
+venv/
+env/
+staticfiles/
+test_db.sqlite3

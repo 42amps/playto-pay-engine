@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "myprovider": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Canopy Wave",
+      "options": {
+        "baseURL": "https://inference.canopywave.io/v1",
+        "headers": {
+          "Authorization": "Bearer yi1qNAvKqa0iB3BYqcOlGvv-mPnWOXHaC5qHi7bVyp0"
+        }
+      },
+      "models": {
+        "moonshotai/kimi-k2.6": {
+          "name": "moonshotai/kimi-k2.6",
+          "context": 256000,
+          "output": 32000,
+          "variants": {
+            "thinking": {
+              "reasoningEffort": "high"
+            }
+          }
+        }
+      }
+    }
+  }
+}
