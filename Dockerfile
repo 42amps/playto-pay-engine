@@ -33,4 +33,4 @@ RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
-CMD sh -c "python manage.py migrate --noinput && python manage.py seed && gunicorn playto.wsgi:application --bind 0.0.0.0:8000"
+CMD sh -c "python manage.py migrate --noinput && if [ \"$RESET_DATA\" = \"1\" ]; then python manage.py reset; else python manage.py seed; fi && gunicorn playto.wsgi:application --bind 0.0.0.0:8000"
