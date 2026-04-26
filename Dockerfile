@@ -22,10 +22,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ .
 
-# Copy built frontend assets into Django's static directory
-# so collectstatic picks them up
-RUN mkdir -p /app/static /app/templates
-COPY --from=frontend-builder /frontend/dist/assets/ /app/static/
+# Copy built frontend assets into Django's static directory.
+# Vite outputs to dist/assets/ and base: '/static/' makes index.html
+# reference /static/assets/... so we preserve the assets/ folder.
+RUN mkdir -p /app/static/assets /app/templates
+COPY --from=frontend-builder /frontend/dist/assets/ /app/static/assets/
 COPY --from=frontend-builder /frontend/dist/index.html /app/templates/index.html
 
 RUN python manage.py collectstatic --noinput
