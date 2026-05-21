@@ -1,5 +1,6 @@
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from unittest import skipIf
 
 from django.db import connection
 from django.test import TransactionTestCase
@@ -34,6 +35,10 @@ class ConcurrencyTest(TransactionTestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Api-Key test-api-key-concurrency")
 
+    @skipIf(
+        connection.vendor == "sqlite",
+        "SQLite does not provide the row-level locking semantics required for this concurrency regression.",
+    )
     def test_concurrent_payouts_prevent_overdraft(self):
         """Two simultaneous 60-rupee payouts against 100-rupee balance:
         exactly one succeeds, the other is rejected cleanly."""
@@ -68,19 +73,8 @@ class ConcurrencyTest(TransactionTestCase):
                 if result is not None:
                     responses.append(result)
 
-        # On SQLite, we may get a database lock which also prevents overdraft
-        if connection.vendor == "sqlite":
-            # At least one request should succeed; the other should either fail
-            # with 400 or encounter a database lock (which also prevents overdraft)
-            self.assertIn(201, responses, f"Expected one success. Got: {responses}, errors: {errors}")
-            self.assertLessEqual(
-                Payout.objects.filter(merchant=self.merchant).count(),
-                1,
-                "More than one payout created - overdraft occurred!",
-            )
-        else:
-            # PostgreSQL: exactly one 201 and one 400
-            self.assertEqual(sorted(responses), [201, 400], f"Got responses: {responses}, errors: {errors}")
+        # PostgreSQL: exactly one 201 and one 400
+        self.assertEqual(sorted(responses), [201, 400], f"Got responses: {responses}, errors: {errors}")
 
         # Assert at most one payout was created (never overdraw)
         self.assertLessEqual(
