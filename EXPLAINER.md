@@ -1,4 +1,4 @@
-# Playto Payout Engine — Technical Explainer
+# PayRail - Real-Time Payout Engine Technical Explainer
 
 ## 1. The Ledger
 
