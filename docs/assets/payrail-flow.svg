@@ -1,0 +1,55 @@
+<svg width="1200" height="660" viewBox="0 0 1200 660" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">PayRail payout correctness flow</title>
+  <desc id="desc">PayRail payout flow showing idempotency, row-level locking, ledger debit hold, background processing, and refund on failure.</desc>
+  <rect width="1200" height="660" fill="#F8FAFC"/>
+  <rect x="44" y="44" width="1112" height="572" rx="28" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+  <text x="82" y="104" fill="#0F172A" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800">PayRail - payout correctness flow</text>
+  <text x="82" y="138" fill="#475569" font-family="Inter, Arial, sans-serif" font-size="18">A demo architecture for preventing duplicate payouts, stale balance reads, and double-spend races.</text>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <rect x="90" y="230" width="170" height="88" rx="16" fill="#EFF6FF" stroke="#60A5FA" stroke-width="2"/>
+    <text x="120" y="265" fill="#1E3A8A" font-size="19" font-weight="800">Merchant UI</text>
+    <text x="120" y="292" fill="#1E40AF" font-size="15">React dashboard</text>
+
+    <rect x="328" y="230" width="180" height="88" rx="16" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2"/>
+    <text x="358" y="265" fill="#0F172A" font-size="19" font-weight="800">Django API</text>
+    <text x="358" y="292" fill="#475569" font-size="15">Validate request</text>
+
+    <rect x="578" y="164" width="250" height="220" rx="18" fill="#111827"/>
+    <text x="614" y="210" fill="#FFFFFF" font-size="20" font-weight="800">Atomic transaction</text>
+    <text x="614" y="250" fill="#C7D2FE" font-size="15">1. Check idempotency key</text>
+    <text x="614" y="282" fill="#C7D2FE" font-size="15">2. SELECT FOR UPDATE</text>
+    <text x="614" y="314" fill="#C7D2FE" font-size="15">3. Read ledger balance</text>
+    <text x="614" y="346" fill="#C7D2FE" font-size="15">4. Create payout + debit</text>
+
+    <rect x="900" y="150" width="190" height="90" rx="16" fill="#F0FDF4" stroke="#22C55E" stroke-width="2"/>
+    <text x="930" y="187" fill="#14532D" font-size="19" font-weight="800">Ledger</text>
+    <text x="930" y="214" fill="#166534" font-size="15">Append-only rows</text>
+
+    <rect x="900" y="284" width="190" height="90" rx="16" fill="#FFF7ED" stroke="#FB923C" stroke-width="2"/>
+    <text x="930" y="321" fill="#7C2D12" font-size="19" font-weight="800">Worker</text>
+    <text x="930" y="348" fill="#9A3412" font-size="15">Process payout</text>
+
+    <rect x="578" y="455" width="250" height="80" rx="16" fill="#FEF2F2" stroke="#F87171" stroke-width="2"/>
+    <text x="614" y="490" fill="#7F1D1D" font-size="19" font-weight="800">Failure refund flow</text>
+    <text x="614" y="517" fill="#991B1B" font-size="15">Failed state + reversing credit</text>
+  </g>
+
+  <g stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M260 274H328"/>
+    <path d="M508 274H578"/>
+    <path d="M828 218H900"/>
+    <path d="M828 328H900"/>
+    <path d="M995 374C995 445 880 496 828 496"/>
+  </g>
+  <g fill="#334155">
+    <path d="M328 274L316 267V281L328 274Z"/>
+    <path d="M578 274L566 267V281L578 274Z"/>
+    <path d="M900 218L888 211V225L900 218Z"/>
+    <path d="M900 328L888 321V335L900 328Z"/>
+    <path d="M828 496L840 489V503L828 496Z"/>
+  </g>
+
+  <rect x="90" y="468" width="390" height="52" rx="14" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="116" y="500" fill="#3730A3" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700">Tiny Studio: two INR 60 requests against INR 100 - one succeeds, one is rejected.</text>
+</svg>

@@ -1,5 +1,7 @@
 # PayRail - Real-Time Payout Engine Technical Explainer
 
+![PayRail payout correctness flow](docs/assets/payrail-flow.svg)
+
 ## 1. The Ledger
 
 **Balance calculation query (`payouts/models.py`):**

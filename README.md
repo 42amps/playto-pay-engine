@@ -6,6 +6,8 @@ This is an engineering demo. It does not integrate with real banks and does not 
 
 **Live demo:** [https://playto-pay-engine.onrender.com](https://playto-pay-engine.onrender.com)
 
+![PayRail payout correctness flow](docs/assets/payrail-flow.svg)
+
 ## Why This Exists
 
 Payout systems fail in subtle ways. A backend can look correct in happy-path tests while still allowing duplicate payouts, overdrafts, stale balance reads, or impossible status transitions under retries and concurrent requests.
